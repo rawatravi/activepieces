@@ -14,7 +14,7 @@ import { ActivepiecesError, ErrorCode } from '@activepieces/shared'
 import { flowService } from './flow.service'
 import { CountFlowsRequest } from '@activepieces/shared'
 
-const DEFUALT_PAGE_SIZE = 10
+const DEFAULT_PAGE_SIZE = 10
 
 export const flowController = async (fastify: FastifyInstance) => {
     fastify.post(
@@ -72,7 +72,7 @@ export const flowController = async (fastify: FastifyInstance) => {
                 projectId: request.principal.projectId,
                 folderId: request.query.folderId,
                 cursorRequest: request.query.cursor ?? null,
-                limit: request.query.limit ?? DEFUALT_PAGE_SIZE,
+                limit: request.query.limit ?? DEFAULT_PAGE_SIZE,
             })
         },
     )
