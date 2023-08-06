@@ -22,7 +22,13 @@ const commonActionProps = {
 // Code Action
 
 export const CodeActionSettings = Type.Object({
+  /**
+   * File id for source code
+   */
   artifactSourceId: Type.Optional(Type.String({})),
+  /**
+   * File id for packaged code
+   */
   artifactPackagedId: Type.Optional(Type.String({})),
   artifact: Type.Optional(Type.String({})),
   input: Type.Record(Type.String({}), Type.Any()),
