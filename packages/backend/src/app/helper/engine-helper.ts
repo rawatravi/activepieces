@@ -290,7 +290,7 @@ export const engineHelper = {
     },
 
     async executeCode(operation: ExecuteCodeOperation): Promise<EngineHelperResponse<EngineHelperCodeResult>> {
-        logger.debug(operation, '[EngineHelper#executeAction] operation')
+        logger.debug({ ...operation, codeBase64: undefined }, '[EngineHelper#executeAction] operation')
 
         const sandbox = await sandboxManager.obtainSandbox(apId())
         await sandbox.recreate()
