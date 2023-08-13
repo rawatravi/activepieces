@@ -132,14 +132,15 @@ export class AppConnectionService {
             },
         })
 
-        let queryBuilder = repo
-            .createQueryBuilder('app_connection')
-            .where({ projectId })
-
-        if (appName !== undefined) {
-            queryBuilder = queryBuilder.where({ appName })
+        const querySelector: Record<string, string> = {
+            projectId,
         }
-
+        if (!isNil(appName)) {
+            querySelector.appName = appName
+        }
+        const queryBuilder = repo
+            .createQueryBuilder('app_connection')
+            .where(querySelector)
         const { data, cursor } = await paginator.paginate(queryBuilder)
         const promises: Promise<AppConnection>[] = []
 
@@ -261,7 +262,7 @@ const engineValidateAuth = async (
     const pieceMatadata = await pieceMetadataService.get({
         name: pieceName,
         projectId,
-        version: undefined
+        version: undefined,
     })
     const engineInput: ExecuteValidateAuthOperation = {
         pieceName,
