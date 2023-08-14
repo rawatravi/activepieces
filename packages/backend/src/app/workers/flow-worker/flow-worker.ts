@@ -287,11 +287,23 @@ const getArtifactFile = async (projectId: ProjectId, codeActionSettings: CodeAct
         }
 
         const fileEntity = await fileService.getOneOrThrow({ projectId, fileId: sourceId })
-        const builtFile = await codeBuilder.build(fileEntity.data)
+
+        const codeBuildOutput = await codeBuilder.build({
+            sourceArchiveContent: fileEntity.data,
+        })
+
+        if (!codeBuildOutput.success) {
+            throw new ActivepiecesError({
+                code: ErrorCode.CODE_BUILD_FAILURE,
+                params: {
+                    message: codeBuildOutput.error,
+                },
+            })
+        }
 
         const savedPackagedFile = await fileService.save({
             projectId,
-            data: builtFile,
+            data: codeBuildOutput.archiveContent,
         })
 
         codeActionSettings.artifactPackagedId = savedPackagedFile.id

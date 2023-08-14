@@ -2,24 +2,11 @@ import { ExecOptions } from 'node:child_process'
 import { exec } from './exec'
 import { logger } from './logger'
 
-type PackageManagerOutput = {
-    stdout: string
-    stderr: string
-}
-
-type PnpmCoreCommand = 'add' | 'init' | 'link'
-type PnpmDependencyCommand = 'webpack'
-type PnpmCommand = PnpmCoreCommand | PnpmDependencyCommand
-
-export type PackageInfo = PackageMetdataInfo & {
-    name: string
-}
-
-export type PackageMetdataInfo = {
-    version: string
-}
-
-export type PackageManagerDependencies = Record<string, PackageMetdataInfo>
+const INSTALL_OPTIONS = [
+    '--prefer-offline',
+    '--config.lockfile=false',
+    '--config.auto-install-peers=true',
+] as const
 
 const executePnpm = async (directory: string, command: PnpmCommand, ...args: string[]): Promise<PackageManagerOutput> => {
     const fullCommand = `npx pnpm ${command} ${args.join(' ')}`
@@ -45,18 +32,12 @@ export const packageManager = {
             }
         }
 
-        const options = [
-            '--prefer-offline',
-            '--config.lockfile=false',
-            '--config.auto-install-peers=true',
-        ]
-
         const dependencyArgs = Object.entries(dependencies)
             .map(([name, meta]) => {
                 return `${name}@${meta.version}`
             })
 
-        return await executePnpm(directory, 'add', ...dependencyArgs, ...options)
+        return await executePnpm(directory, 'add', ...dependencyArgs, ...INSTALL_OPTIONS)
     },
 
     async initProject(directory: string): Promise<PackageManagerOutput> {
@@ -66,8 +47,36 @@ export const packageManager = {
     async runLocalDependency(directory: string, command: PnpmDependencyCommand): Promise<PackageManagerOutput> {
         return await executePnpm(directory, command)
     },
+
     async linkDependency(directory: string, dependencyDirectory: string) {
         const result = await executePnpm(directory, 'link', dependencyDirectory)
         logger.info(`[PackageManager#linkDependency] result: ${JSON.stringify(result)} for directory: ${directory} and dependencyDirectory: ${dependencyDirectory}`)
     },
+
+    async installDependencies({ directory }: InstallDependenciesParams): Promise<PackageManagerOutput> {
+        return await executePnpm(directory, 'install', ...INSTALL_OPTIONS)
+    },
 }
+
+type PackageManagerOutput = {
+    stdout: string
+    stderr: string
+}
+
+type PnpmCoreCommand = 'add' | 'init' | 'link' | 'install'
+type PnpmDependencyCommand = 'tsc'
+type PnpmCommand = PnpmCoreCommand | PnpmDependencyCommand
+
+type InstallDependenciesParams = {
+    directory: string
+}
+
+export type PackageMetadataInfo = {
+    version: string
+}
+
+export type PackageInfo = PackageMetadataInfo & {
+    name: string
+}
+
+export type PackageManagerDependencies = Record<string, PackageMetadataInfo>

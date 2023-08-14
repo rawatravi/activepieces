@@ -29,6 +29,10 @@ import { codeBuilder } from '../../workers/code-worker/code-builder'
 import { isNil } from '@activepieces/shared'
 import { getServerUrl } from '../../helper/public-ip-utils'
 import { sandboxManager } from '../../workers/sandbox'
+import { codeDownloader } from '../code/code-downloader'
+import { packageManager } from '../../helper/package-manager'
+import { logger } from '../../helper/logger'
+import { exec } from '../../helper/exec'
 
 export const stepRunService = {
     async create({ projectId, flowVersionId, stepName }: CreateParams): Promise<StepRunResponse> {
@@ -102,18 +106,63 @@ async function executePiece({ step, projectId, flowVersion }: ExecuteParams<Piec
 }
 
 async function executeCode({ step, flowVersion, projectId }: ExecuteParams<CodeAction>): Promise<StepRunResponse> {
-    const file = await fileService.getOneOrThrow({
+    const sourceArchiveId = step.settings.artifactSourceId
+
+    if (isNil(sourceArchiveId)) {
+        throw new ActivepiecesError({
+            code: ErrorCode.VALIDATION,
+            params: {
+                message: `step (${step.name}) artifactSourceId is undefined`,
+            },
+        })
+    }
+
+    const sourceArchive = await fileService.getOneOrThrow({
         projectId,
-        fileId: step.settings.artifactSourceId!,
+        fileId: sourceArchiveId,
     })
-    const bundledCode = await codeBuilder.build(file.data)
+
+    const buildOutput = await codeBuilder.build({
+        sourceArchiveContent: sourceArchive.data,
+    })
+
+    if (!buildOutput.success) {
+        throw new ActivepiecesError({
+            code: ErrorCode.CODE_BUILD_FAILURE,
+            params: {
+                message: buildOutput.error,
+            },
+        })
+    }
+
+    const sandbox = await sandboxManager.obtainSandbox(apId())
+    await sandbox.recreate()
+
+    await codeDownloader.download({
+        archiveContent: buildOutput.archiveContent,
+        archiveId: sourceArchiveId,
+        sandbox,
+    })
+
+    const ls1 = await exec(`ls -la ${sandbox.getSandboxFolderPath()}`)
+    const ls2 = await exec(`ls -la ${sandbox.getSandboxFolderPath()}/${sourceArchiveId}`)
+
+    logger.warn({ ls1, ls2 }, '[StepRunService#executeCode] ls')
+
+    await packageManager.installDependencies({
+        directory: `${sandbox.getSandboxFolderPath()}/${sourceArchiveId}`,
+    })
 
     const { result, standardError, standardOutput } = await engineHelper.executeCode({
-        codeBase64: bundledCode.toString('base64'),
-        input: step.settings.input,
-        flowVersion,
-        projectId,
+        operation: {
+            archiveId: sourceArchiveId,
+            input: step.settings.input,
+            flowVersion,
+            projectId,
+        },
+        sandbox,
     })
+
     return {
         success: result.success,
         output: result.output,

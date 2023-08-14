@@ -14,6 +14,7 @@ export class ActivepiecesError extends Error {
 
 type ErrorParams =
   | AppConnectionNotFoundErrorParams
+  | CodeBuildFailureErrorParams
   | ConfigNotFoundErrorParams
   | EngineOperationFailureParams
   | EntityNotFoundErrorParams
@@ -64,6 +65,13 @@ export type AppConnectionNotFoundErrorParams = BaseErrorParams<
   ErrorCode.APP_CONNECTION_NOT_FOUND,
   {
     id: AppConnectionId;
+  }
+>;
+
+export type CodeBuildFailureErrorParams = BaseErrorParams<
+  ErrorCode.CODE_BUILD_FAILURE,
+  {
+    message?: string;
   }
 >;
 
@@ -274,6 +282,7 @@ export type InvalidAppConnectionParams = BaseErrorParams<
 
 export enum ErrorCode {
   APP_CONNECTION_NOT_FOUND = "APP_CONNECTION_NOT_FOUND",
+  CODE_BUILD_FAILURE = "CODE_BUILD_FAILURE",
   CONFIG_NOT_FOUND = "CONFIG_NOT_FOUND",
   ENGINE_OPERATION_FAILURE = "ENGINE_OPERATION_FAILURE",
   ENTITY_NOT_FOUND = "ENTITY_NOT_FOUND",

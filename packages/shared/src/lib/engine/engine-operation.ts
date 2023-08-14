@@ -58,8 +58,8 @@ export type ExecuteExtractPieceMetadata = {
 }
 
 export type ExecuteCodeOperation = {
-    codeBase64: string
-    flowVersion: FlowVersion,
+    archiveId: string
+    flowVersion: FlowVersion
     input: Record<string, unknown>
     projectId: ProjectId
 }

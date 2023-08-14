@@ -2,7 +2,7 @@ import { ApEnvironment, getPackageAliasForPiece, getPackageVersionForPiece } fro
 import { system } from '../../helper/system/system'
 import { SystemProp } from '../../helper/system/system-prop'
 import { logger } from '../../helper/logger'
-import { PackageInfo, PackageMetdataInfo, packageManager } from '../../helper/package-manager'
+import { PackageInfo, PackageMetadataInfo, packageManager } from '../../helper/package-manager'
 import * as path from 'path'
 import fs from 'fs/promises'
 import { FilePieceMetadataService } from '../../pieces/piece-metadata-service/file-piece-metadata-service'
@@ -74,7 +74,7 @@ const installDependencies = async (params: InstallDependenciesParams) => {
     const { projectPath, pieces } = params
 
     const uniquePieces = removeDuplicatedPieces(pieces)
-    const packages: [string, PackageMetdataInfo][] = uniquePieces.map(piece => {
+    const packages: [string, PackageMetadataInfo][] = uniquePieces.map(piece => {
         const packageAlias = getPackageAliasForPiece({
             pieceName: piece.name,
             pieceVersion: piece.version,

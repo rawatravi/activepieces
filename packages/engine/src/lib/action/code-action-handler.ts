@@ -64,10 +64,10 @@ export class CodeActionHandler extends BaseActionHandler<CodeAction> {
     }
 
     try {
-      stepOutput.output = await codeExecutor.executeCode(
-        artifactPackagedId,
-        resolvedInput
-      )
+      stepOutput.output = await codeExecutor.executeCode({
+        directory: artifactPackagedId,
+        input: resolvedInput,
+      })
 
       stepOutput.status = StepOutputStatus.SUCCEEDED
       return stepOutput

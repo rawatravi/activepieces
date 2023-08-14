@@ -40,6 +40,11 @@ import { flowVersionService } from '../flows/flow-version/flow-version.service'
 
 const apEnvironment = system.get(SystemProp.ENVIRONMENT)
 
+type ExecuteCodeParams = {
+    operation: ExecuteCodeOperation
+    sandbox: Sandbox
+}
+
 type InstallPieceParams = {
     projectId: string
     path: string
@@ -289,11 +294,9 @@ export const engineHelper = {
         }
     },
 
-    async executeCode(operation: ExecuteCodeOperation): Promise<EngineHelperResponse<EngineHelperCodeResult>> {
-        logger.debug({ ...operation, codeBase64: undefined }, '[EngineHelper#executeAction] operation')
+    async executeCode({ operation, sandbox }: ExecuteCodeParams): Promise<EngineHelperResponse<EngineHelperCodeResult>> {
+        logger.debug({ operation }, '[EngineHelper#executeAction] operation')
 
-        const sandbox = await sandboxManager.obtainSandbox(apId())
-        await sandbox.recreate()
         const input = {
             ...operation,
             workerToken: await generateWorkerToken({ projectId: operation.projectId }),
@@ -310,7 +313,6 @@ export const engineHelper = {
             await sandboxManager.returnSandbox(sandbox.boxId)
         }
     },
-
 
     async extractPieceMetadata(operation: ExecuteExtractPieceMetadata): Promise<EngineHelperResponse<EngineHelperExtractPieceInformation>> {
         logger.info(operation, '[EngineHelper#ExecuteExtractPieceMetadata] operation')

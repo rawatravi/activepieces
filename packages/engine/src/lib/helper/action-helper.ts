@@ -7,8 +7,6 @@ import {
     DynamicProperties,
     MultiSelectDropdownProperty,
     Piece,
-    PieceAuthProperty,
-    PiecePropValueSchema,
     PiecePropertyMap,
     PropertyType,
     StaticPropsValue,
@@ -164,7 +162,7 @@ const executionStateFromExecutionContext = (executionContext: Record<string, unk
 
 export const pieceHelper = {
     async executeCode(params: ExecuteCodeOperation): Promise<ExecuteActionResponse> {
-        const { codeBase64, input, flowVersion } = params;
+        const { archiveId, input, flowVersion } = params;
 
         const executionContext = await generateTestExecutionContext(flowVersion)
         const executionState = executionStateFromExecutionContext(executionContext)
@@ -176,11 +174,11 @@ export const pieceHelper = {
         })
 
         try {
-            const code = Buffer.from(codeBase64, 'base64').toString('utf-8');
-            const fileName = `${globals.codeDirectory}/code.js`;
-            await fs.mkdir(globals.codeDirectory, { recursive: true });
-            await fs.writeFile(fileName, code, 'utf-8');
-            const result = await codeExecutor.executeCode('code', resolvedInput);
+            const result = await codeExecutor.executeCode({
+                directory: archiveId,
+                input: resolvedInput,
+            })
+
             return {
                 success: true,
                 output: result,
