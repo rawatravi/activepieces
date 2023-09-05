@@ -15,7 +15,7 @@ function getSQLiteFilePath() {
     if (!fs.existsSync(hiddenFolderPath)) {
         fs.mkdirSync(hiddenFolderPath)
     }
-    const sqliteFilePath = path.join(hiddenFolderPath, 'database.sqlite')
+    const sqliteFilePath = path.join('database.sqlite')
     return sqliteFilePath
 }
 

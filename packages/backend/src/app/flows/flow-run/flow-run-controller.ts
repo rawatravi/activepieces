@@ -19,7 +19,7 @@ const TestFlowRunRequest = {
 const ResumeFlowRunRequest = {
     schema: {
         params: Type.Object({
-            id: ApId,
+            id: Type.String(),
         }),
         querystring: Type.Object({
             action: Type.String(),
@@ -81,6 +81,13 @@ export const flowRunController: FastifyPluginCallbackTypebox = (app, _options, d
         await flowRunService.resume({
             flowRunId: req.params.id,
             action: req.query.action,
+        })
+    })
+
+    app.all('/:id/chat', async (req : any) => {
+        await flowRunService.resume({
+            flowRunId: req.body.sessionId,
+            action: req.body.message,
         })
     })
 

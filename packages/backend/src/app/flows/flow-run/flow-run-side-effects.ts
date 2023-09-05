@@ -77,6 +77,8 @@ export const flowRunSideEffects = {
                     delay: calculateDelayForResumeJob(pauseMetadata.resumeDateTime),
                 })
                 break
+            case PauseType.USER_RESPONSE:
+                break
             case PauseType.WEBHOOK:
                 break
         }

@@ -54,7 +54,8 @@ export type ResumeStepMetadata =
 
 export enum PauseType {
   DELAY = 'DELAY',
-  WEBHOOK = "WEBHOOK"
+  WEBHOOK = "WEBHOOK",
+  USER_RESPONSE="USER_RESPONSE"
 }
 
 type BasePauseMetadata<T extends PauseType> = {
@@ -69,8 +70,11 @@ export type DelayPauseMetadata = BasePauseMetadata<PauseType.DELAY> & {
 export type WebhookPauseMetadata =  BasePauseMetadata<PauseType.WEBHOOK> & {
   actions: string[];
 }
+export type UserResponsePauseMetadata =  BasePauseMetadata<PauseType.USER_RESPONSE> & {
+  usermessage: string;
+}
 
-export type PauseMetadata = DelayPauseMetadata | WebhookPauseMetadata
+export type PauseMetadata = DelayPauseMetadata | WebhookPauseMetadata |UserResponsePauseMetadata
 
 
 export type PauseExecutionOutput = BaseExecutionOutput<ExecutionOutputStatus.PAUSED> & {
